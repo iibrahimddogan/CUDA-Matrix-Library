@@ -1,7 +1,8 @@
 #include <iostream>
 #include "matrix_math.cuh"
 
-__global__ void sumofmatrix_kernel(float* d_a, float* d_b, float* d_c, int matrixsize) {
+__global__ void sumofmatrix_kernel(float *d_a, float *d_b, float *d_c, int matrixsize)
+{
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -11,17 +12,17 @@ __global__ void sumofmatrix_kernel(float* d_a, float* d_b, float* d_c, int matri
     }
 }
 
-
-void sumofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
+void sumofmatrix(const CudaMatrix &A, const CudaMatrix &B, CudaMatrix &C)
+{
     int matrixsize = A.row * A.col;
 
     size_t matrixbytesize = matrixsize * sizeof(float);
 
-    float* d_a, * d_B, * d_c;
+    float *d_a, *d_B, *d_c;
 
-    cudaMalloc((void**)&d_a, matrixbytesize);
-    cudaMalloc((void**)&d_B, matrixbytesize);
-    cudaMalloc((void**)&d_c, matrixbytesize);
+    cudaMalloc((void **)&d_a, matrixbytesize);
+    cudaMalloc((void **)&d_B, matrixbytesize);
+    cudaMalloc((void **)&d_c, matrixbytesize);
 
     cudaMemcpy(d_a, A.data, matrixbytesize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, B.data, matrixbytesize, cudaMemcpyHostToDevice);
@@ -29,39 +30,36 @@ void sumofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
     int blocksize = 256;
     int gridsize = (matrixsize + blocksize - 1) / blocksize;
 
-    sumofmatrix_kernel<<<gridsize, blocksize>>>(d_a,d_B,d_c,matrixsize);
-    
+    sumofmatrix_kernel<<<gridsize, blocksize>>>(d_a, d_B, d_c, matrixsize);
+
     cudaMemcpy(C.data, d_c, matrixbytesize, cudaMemcpyDeviceToHost);
 
     cudaFree(d_a);
     cudaFree(d_B);
     cudaFree(d_c);
-
-
 }
 
-
-__global__ void difofmatrix_kernel(float* d_a, float* d_b, float* d_c, int matrixsize){
+__global__ void difofmatrix_kernel(float *d_a, float *d_b, float *d_c, int matrixsize)
+{
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < matrixsize)
     {
         d_c[i] = d_a[i] - d_b[i];
     }
-    
 }
 
-void difofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
+void difofmatrix(const CudaMatrix &A, const CudaMatrix &B, CudaMatrix &C)
+{
     int matrixsize = A.col * A.row;
 
     size_t matrixbytesize = matrixsize * sizeof(float);
 
-    float* d_a,* d_b, *d_c;
+    float *d_a, *d_b, *d_c;
 
-    cudaMalloc((void**)&d_a, matrixbytesize);
-    cudaMalloc((void**)&d_b, matrixbytesize);
-    cudaMalloc((void**)&d_c, matrixbytesize);
-
+    cudaMalloc((void **)&d_a, matrixbytesize);
+    cudaMalloc((void **)&d_b, matrixbytesize);
+    cudaMalloc((void **)&d_c, matrixbytesize);
 
     cudaMemcpy(d_a, A.data, matrixbytesize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, B.data, matrixbytesize, cudaMemcpyHostToDevice);
@@ -76,11 +74,10 @@ void difofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
     cudaFree(d_a);
     cudaFree(d_b);
     cudaFree(d_c);
-
-
 }
 
-__global__ void mulofmatrix_samesize_kernel(float* d_a, float* d_b, float* d_c, int widht){
+__global__ void mulofmatrix_samesize_kernel(float *d_a, float *d_b, float *d_c, int widht)
+{
 
     int row = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -89,7 +86,7 @@ __global__ void mulofmatrix_samesize_kernel(float* d_a, float* d_b, float* d_c, 
     if (row < widht && col < widht)
     {
         float sum = 0.0f;
-        
+
         for (int k = 0; k < widht; k++)
         {
             float a = d_a[row * widht + k];
@@ -98,25 +95,24 @@ __global__ void mulofmatrix_samesize_kernel(float* d_a, float* d_b, float* d_c, 
 
             sum += a * b;
         }
-        
-        d_c[row * widht + col] = sum;
 
+        d_c[row * widht + col] = sum;
     }
-    
 }
 
-void mulofmatrix_samesize(const Matrix& A, const Matrix& B, Matrix& C) {
+void mulofmatrix_samesize(const CudaMatrix &A, const CudaMatrix &B, CudaMatrix &C)
+{
 
     int widht = A.col;
     int matrixsize = A.col * A.row;
 
     size_t matrixbytesize = matrixsize * sizeof(float);
 
-    float* d_A, * d_b, *d_c;
+    float *d_A, *d_b, *d_c;
 
-    cudaMalloc((void**) &d_A, matrixbytesize);
-    cudaMalloc((void**) &d_b, matrixbytesize);
-    cudaMalloc((void**) &d_c, matrixbytesize);
+    cudaMalloc((void **)&d_A, matrixbytesize);
+    cudaMalloc((void **)&d_b, matrixbytesize);
+    cudaMalloc((void **)&d_c, matrixbytesize);
 
     cudaMemcpy(d_A, A.data, matrixbytesize, cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, B.data, matrixbytesize, cudaMemcpyHostToDevice);
@@ -133,26 +129,27 @@ void mulofmatrix_samesize(const Matrix& A, const Matrix& B, Matrix& C) {
     cudaFree(d_A);
     cudaFree(d_b);
     cudaFree(d_c);
-
 }
 
-__global__ void mulofmatrix_kernel(float* d_a, float* d_b, float* d_c, int a_row, int a_col_b_row, int b_col){
+__global__ void mulofmatrix_kernel(float *d_a, float *d_b, float *d_c, int a_row, int a_col_b_row, int b_col)
+{
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (row < a_row && col < b_col){
+    if (row < a_row && col < b_col)
+    {
         float sum = 0.0f;
         for (int i = 0; i < a_col_b_row; i++)
         {
             sum += d_a[row * a_col_b_row + i] * d_b[i * b_col + col];
         }
-        d_c[row * b_col + col] = sum;       
+        d_c[row * b_col + col] = sum;
     }
 }
 
-
-void mulofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
+void mulofmatrix(const CudaMatrix &A, const CudaMatrix &B, CudaMatrix &C)
+{
     int a_row = A.row;
     int a_col_b_row = A.col;
     int b_col = B.col;
@@ -164,99 +161,116 @@ void mulofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
     size_t matrixbytesize = sizeof(float) * matrixsize;
     size_t matrixbytesizeA = sizeof(float) * matrixsizea;
     size_t matrixbytesizeB = sizeof(float) * matrixsizeB;
-    
-    float * d_a, * d_b, * d_c;
 
-    cudaMalloc((void**)&d_a,matrixbytesizeA);
-    cudaMalloc((void**)&d_b,matrixbytesizeB);
-    cudaMalloc((void**)&d_c,matrixbytesize);
+    float *d_a, *d_b, *d_c;
 
-    cudaMemcpy(d_a, A.data, matrixbytesizeA, cudaMemcpyHostToDevice );
-    cudaMemcpy(d_b, B.data, matrixbytesizeB, cudaMemcpyHostToDevice );
+    cudaMalloc((void **)&d_a, matrixbytesizeA);
+    cudaMalloc((void **)&d_b, matrixbytesizeB);
+    cudaMalloc((void **)&d_c, matrixbytesize);
 
-    dim3 blocksize(16,16,1);
+    cudaMemcpy(d_a, A.data, matrixbytesizeA, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B.data, matrixbytesizeB, cudaMemcpyHostToDevice);
 
-    dim3 gridsize((b_col + blocksize.x - 1) / blocksize.x, 
-              (a_row + blocksize.y - 1) / blocksize.y);
+    dim3 blocksize(16, 16, 1);
+
+    dim3 gridsize((b_col + blocksize.x - 1) / blocksize.x,
+                  (a_row + blocksize.y - 1) / blocksize.y);
 
     mulofmatrix_kernel<<<gridsize, blocksize>>>(d_a, d_b, d_c, a_row, a_col_b_row, b_col);
-    
-    
+
     cudaDeviceSynchronize();
 
-    
     cudaMemcpy(C.data, d_c, matrixbytesize, cudaMemcpyDeviceToHost);
-
 
     cudaFree(d_a);
     cudaFree(d_b);
     cudaFree(d_c);
-
 }
 
+__global__ void mul_scalar_kernel(float *d_a, float scalar, int matrixsize)
+{
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
 
- __global__ void reverse_2x2_matrix_kernel(float* d_a){
+    if (i < matrixsize)
+    {
+        d_a[i] = d_a[i] * scalar;
+    }
+}
 
-if (threadIdx.x == 0 && blockIdx.x == 0)
+void mul_scalar(CudaMatrix &A, float scalar)
+{
+    int matrixsize = A.row * A.col;
+    size_t matrixbytesize = sizeof(float) * matrixsize;
 
+    float * d_a;
+
+    cudaMalloc((void**)&d_a,matrixbytesize);
+
+    cudaMemcpy(d_a, A.data, matrixbytesize, cudaMemcpyHostToDevice);
+
+    dim3 blocksize(256);
+
+    dim3 gridsize((matrixsize + blocksize.x - 1) / blocksize.x);
+
+    mul_scalar_kernel<<< gridsize, blocksize>>>(d_a, scalar, matrixsize);
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(A.data, d_a, matrixbytesize, cudaMemcpyDeviceToHost);
+    cudaFree(d_a);  
+
+    
+}
+
+__global__ void reverse_2x2_matrix_kernel(float *d_a)
 {
 
-float a = d_a[0];
+    if (threadIdx.x == 0 && blockIdx.x == 0)
 
-float b = d_a[1];
+    {
 
-float c = d_a[2];
+        float a = d_a[0];
 
-float d = d_a[3];
+        float b = d_a[1];
 
+        float c = d_a[2];
 
-float det = (a * d) - (b * c);
+        float d = d_a[3];
 
+        float det = (a * d) - (b * c);
 
-if (det != 0.0f)
+        if (det != 0.0f)
 
+        {
+
+            d_a[0] = d / det;
+
+            d_a[1] = -b / det;
+
+            d_a[2] = -c / det;
+
+            d_a[3] = a / det; /* code */
+        }
+    }
+}
+
+void reverse_2x2_matrix(CudaMatrix &A)
 {
 
-d_a[0] = d / det;
+    size_t matrixsize = sizeof(float) * 4;
 
-d_a[1] = -b / det;
+    float *d_a;
 
-d_a[2] = -c / det;
+    cudaMalloc((void **)&d_a, matrixsize);
 
-d_a[3] = a / det;/* code */
+    cudaMemcpy(d_a, A.data, matrixsize, cudaMemcpyHostToDevice);
 
+    reverse_2x2_matrix_kernel<<<1, 1>>>(d_a);
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(A.data, d_a, matrixsize, cudaMemcpyDeviceToHost);
+
+    cudaFree(d_a);
 }
 
-}
-
-}
-
-
-void reverse_2x2_matrix(Matrix& A){
-
-
-size_t matrixsize = sizeof(float) * 4;
-
-
-float * d_a;
-
-
-cudaMalloc((void**)&d_a, matrixsize);
-
-
-cudaMemcpy(d_a, A.data, matrixsize, cudaMemcpyHostToDevice);
-
-
-reverse_2x2_matrix_kernel<<<1,1>>>(d_a);
-
-
-cudaDeviceSynchronize();
-
-
-cudaMemcpy(A.data, d_a, matrixsize, cudaMemcpyDeviceToHost);
-
-
-cudaFree(d_a);
-
-
-} 

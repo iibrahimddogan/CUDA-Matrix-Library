@@ -7,9 +7,9 @@ int main() {
     int col = 1000;
     int sizeofmatrix = row * col;
 
-    Matrix A = {row, col, new float[sizeofmatrix]};
-    Matrix B = {row, col, new float[sizeofmatrix]};
-    Matrix C = {row, col, new float[sizeofmatrix]};
+    CudaMatrix A = {row, col, new float[sizeofmatrix]};
+    CudaMatrix B = {row, col, new float[sizeofmatrix]};
+    CudaMatrix C = {row, col, new float[sizeofmatrix]};
 
     for (int i = 0; i < sizeofmatrix; i++)
     {

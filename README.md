@@ -1,1 +1,1 @@
-# CUDA-Matrix-Library
+# CUDA-CudaMatrix-Library
