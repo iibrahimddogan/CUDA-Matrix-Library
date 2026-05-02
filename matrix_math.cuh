@@ -11,5 +11,5 @@ void sumofmatrix(const Matrix& A, const Matrix& B, Matrix& C);
 void difofmatrix(const Matrix& A, const Matrix& B, Matrix& C);
 void mulofmatrix_samesize(const Matrix& A, const Matrix& B, Matrix& C);
 void mulofmatrix(const Matrix& A, const Matrix& B, Matrix& C);
-
+void reverse_2x2_matrix(Matrix& A);
 #endif 

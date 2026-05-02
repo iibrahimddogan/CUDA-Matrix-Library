@@ -193,3 +193,70 @@ void mulofmatrix(const Matrix& A, const Matrix& B, Matrix& C) {
     cudaFree(d_c);
 
 }
+
+
+ __global__ void reverse_2x2_matrix_kernel(float* d_a){
+
+if (threadIdx.x == 0 && blockIdx.x == 0)
+
+{
+
+float a = d_a[0];
+
+float b = d_a[1];
+
+float c = d_a[2];
+
+float d = d_a[3];
+
+
+float det = (a * d) - (b * c);
+
+
+if (det != 0.0f)
+
+{
+
+d_a[0] = d / det;
+
+d_a[1] = -b / det;
+
+d_a[2] = -c / det;
+
+d_a[3] = a / det;/* code */
+
+}
+
+}
+
+}
+
+
+void reverse_2x2_matrix(Matrix& A){
+
+
+size_t matrixsize = sizeof(float) * 4;
+
+
+float * d_a;
+
+
+cudaMalloc((void**)&d_a, matrixsize);
+
+
+cudaMemcpy(d_a, A.data, matrixsize, cudaMemcpyHostToDevice);
+
+
+reverse_2x2_matrix_kernel<<<1,1>>>(d_a);
+
+
+cudaDeviceSynchronize();
+
+
+cudaMemcpy(A.data, d_a, matrixsize, cudaMemcpyDeviceToHost);
+
+
+cudaFree(d_a);
+
+
+} 
